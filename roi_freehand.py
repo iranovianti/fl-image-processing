@@ -26,6 +26,7 @@ def arrays_to_area(a_list,kernel_size=(12,12))
     	areas.append(filled)
     return areas
 
+
 def roi_to_areas(path,image_size):
 
 	arrays = roi_to_arrays(path,image_size)
