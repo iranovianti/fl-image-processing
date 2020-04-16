@@ -26,14 +26,14 @@ def arrays_to_area(a_list,kernel_size=(12,12)):
 	
 	for array in a_list:
 		border = cv2.dilate(array, kernel)
-    	filled = np.where((flood_fill(border, (0,0), 1))==1, 0, 1)
-    	filled = np.add(filled, border)
-    	areas.append(filled)
-    return areas
+		filled = np.where((flood_fill(border, (0,0), 1))==1, 0, 1)
+		filled = np.add(filled, border)
+		areas.append(filled)
+	return areas
 
 
 def roi_to_areas(path,image_size,kernel_size=(12,12)):
 
 	arrays = roi_to_arrays(path,image_size)
-	areas = arrays_to_area(arrays)
+	areas = arrays_to_area(arrays,kernel_size)
 	return areas
