@@ -1,6 +1,6 @@
 from read_roi import read_roi_zip
 import numpy as np
-import cv2
+from skimage.draw import polygon
 
 """Some functions to process ImageJ roi files.
 Taking roi for borders (like freehand, ellips, etc.) and return the binary files with filled area"""
@@ -8,32 +8,13 @@ Taking roi for borders (like freehand, ellips, etc.) and return the binary files
 def roi_to_arrays(path,image_size):
 #making roi into numpy arrays with several channels corresponding to the number of rois
 	rois = read_roi_zip(path)
-	coordinates = [[v['x'], v['y']] for k,v in rois.items()]
-	arrays = []
+	coordinates = {k: [v['y'], v['x']] for k,v in rois.items() if v['type'] == 'freehand'}
+	masks = {}
 
-	for coor in coordinates:
-		x,y = np.subtract(coor, 1)
+	for k, coor in coordinates.items():
+		r, c = coor
+		rr, cc = polygon(r, c)
 		binary = np.zeros(image_size)
-		binary[x,y] = 1
-		arrays.append(np.transpose(binary))
-	return arrays
-
-
-def arrays_to_area(a_list,kernel_size=(12,12)):
-#taking arrays of rois to return binary images of filled area
-	areas = []
-	kernel = cv2.getStructuringElement(cv2.MORPH_RECT,kernel_size)
-	
-	for array in a_list:
-		border = cv2.dilate(array, kernel)
-		filled = np.where((flood_fill(border, (0,0), 1))==1, 0, 1)
-		filled = np.add(filled, border)
-		areas.append(filled)
-	return areas
-
-
-def roi_to_areas(path,image_size,kernel_size=(12,12)):
-
-	arrays = roi_to_arrays(path,image_size)
-	areas = arrays_to_area(arrays,kernel_size)
-	return areas
+		binary[rr, cc] = 1
+		masks[k] = binary
+	return masks
